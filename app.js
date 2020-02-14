@@ -3,12 +3,13 @@ const bodyParser = require('body-parser');
 const collectible = require('./routes/collectible');
 var mongoose = require('mongoose');
 const app = express();
+const DB_USER_NAME = process.env.DB_USER_NAME;
+const DB_USER_PASSWORD = process.env.DB_USER_PASSWORD;
+const DEV_DB_URL = 'mongodb://localhost/rdr2map';
+const PROD_DB_URL = `mongodb+srv://${DB_USER_NAME}:${DB_USER_PASSWORD}@cluster0-z1tm1.mongodb.net/rdr2map?retryWrites=true&w=majority`;
+const mongoDB = process.env.NODE_ENV === 'production' ? PROD_DB_URL : DEV_DB_URL;
+const PORT = process.env.PORT || 1234
 
-
-let dev_db_url = 'mongodb://localhost/rdr2map';
-const CONNECTION_URL = "mongodb+srv://rdr2mapuser:5qbjxIEGaUmEc7oE@cluster0-lzzkd.mongodb.net/test?retryWrites=true";
-const DATABASE_NAME = "example";
-let mongoDB = process.env.MONGODB_URI || dev_db_url;
 mongoose.connect(mongoDB);
 mongoose.Promise = global.Promise;
 let db = mongoose.connection;
@@ -30,9 +31,9 @@ var allowCrossDomain = function(req, res, next) {
 app.use(allowCrossDomain);
 app.use('/collectibles', collectible);
 
-let port = 1234;
-app.listen(port, () => {
-    console.log('Server is up and running on port number ' + port);
+
+app.listen(PORT, () => {
+    console.log('Server is up and running on port number ' + PORT);
 });
 
 
