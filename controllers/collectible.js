@@ -3,11 +3,9 @@ const Location = require('../models/location');
 const Group = require('../models/group');
 const Category = require('../models/category');
 const User = require('../models/user');
+const {OAuth2Client} = require('google-auth-library');
+const token = require('../token');
 
-//Simple version, without validation or sanitation
-exports.test = function (req, res) {
-    res.send('Greetings from the Test controller!');
-};
 
 exports.collectible_update = function (req, res) {
 
@@ -95,3 +93,35 @@ exports.get_user = function (req, res) {
         }
     });
 };
+
+exports.verifyToken = function (req, res) {
+  verify(req.body.token)
+    .then(resp => resp !== null ? res.status(200).send({token: resp}) : res.status(401).send())
+    .catch(err => {
+      console.log(err);
+      res.status(401).send();
+    });
+};
+
+async function verify (token) {
+  const client = new OAuth2Client(process.env.GOOGLE_CLIENTID);
+  const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENTID,
+  });
+  const payload = ticket.getPayload();
+  const audience = payload['aud'];
+  if (audience === process.env.GOOGLE_CLIENTID) {
+    const userid = payload['sub'];
+    jwtToken = generateUserToken(userid);
+    return jwtToken
+  } else {
+    return null;
+  }
+
+};
+
+// Generate the Token for the user authenticated in the request
+function generateUserToken(userId) {
+    return token.generateAccessToken(userId);
+}
