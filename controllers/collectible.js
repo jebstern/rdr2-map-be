@@ -104,6 +104,9 @@ exports.verifyToken = function (req, res) {
 };
 
 async function verify (token) {
+  console.log('verify');
+  console.log(process.env.GOOGLE_CLIENTID);
+  console.log(token);
   const client = new OAuth2Client(process.env.GOOGLE_CLIENTID);
   const ticket = await client.verifyIdToken({
       idToken: token,
